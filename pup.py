@@ -30,3 +30,14 @@ SECOND = 1
 MINUTE = 60 * SECOND
 HOUR = 60 * MINUTE
 DAY = 24 * HOUR
+
+class EmailSender(object):
+
+    def __init__(self, subject):
+        # Authentication information
+        self._sender = SENDER_EMAIL_ADDRESS
+        self._password = SENDER_EMAIL_SECRET
+
+        # Message contents
+        self._subject = subject
+        self._init_message()
