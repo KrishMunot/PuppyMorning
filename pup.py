@@ -65,7 +65,13 @@ class EmailSender(object):
         
     def create_session_and_send(self):
         session = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        session.ehlo()
+        session.starttls()
+        session.login(self._sender, self._password)
         for recipient in RECIPIENT_ADDRESSES:
             self.msg['To'] = recipient
             session.sendmail(self._sender, recipient, self.msg.as_string())
+        session.quit()
+        
+    
     
