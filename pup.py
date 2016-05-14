@@ -48,8 +48,24 @@ class EmailSender(object):
         self._subject = subject
         self._init_message()
         
-def attach_image(self, image_filename):
+    def _attach_message_text(self, html_message):
+        """
+        MODIFIES: self.msg
+        EFFECTS:  Attaches the given text to the email message.
+        """
+        part = MIMEText('html', "html")
+        part.set_payload(html_message)
+        self.msg.attach(part)
+        
+    def attach_image(self, image_filename):
         path = os.path.join(DIRECTORY, image_filename)
         img = MIMEImage(open(path, 'rb').read(), _subtype="gif")
         img.add_header('Content-Disposition', 'attachment', filename=image_filename)
         self.msg.attach(img)
+        
+    def create_session_and_send(self):
+        session = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        for recipient in RECIPIENT_ADDRESSES:
+            self.msg['To'] = recipient
+            session.sendmail(self._sender, recipient, self.msg.as_string())
+    
