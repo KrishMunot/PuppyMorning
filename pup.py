@@ -47,3 +47,9 @@ class EmailSender(object):
         # Message contents
         self._subject = subject
         self._init_message()
+        
+def attach_image(self, image_filename):
+        path = os.path.join(DIRECTORY, image_filename)
+        img = MIMEImage(open(path, 'rb').read(), _subtype="gif")
+        img.add_header('Content-Disposition', 'attachment', filename=image_filename)
+        self.msg.attach(img)
