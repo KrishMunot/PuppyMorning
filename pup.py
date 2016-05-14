@@ -48,6 +48,15 @@ class EmailSender(object):
         self._subject = subject
         self._init_message()
         
+    def _init_message(self):
+        """
+        MODIFIES: self.msg
+        EFFECTS:  Creates an email message with the given subject and message.
+        """
+        self.msg = MIMEMultipart()
+        self.msg['Subject'] = self._subject
+        self.msg['From'] = self._sender
+        
     def _attach_message_text(self, html_message):
         """
         MODIFIES: self.msg
