@@ -136,3 +136,62 @@ class MorningPuppiesSender(EmailSender):
         # Save the picture
         urllib.urlretrieve(imgur_link, filename=self.cute_picture_filename)
     
+	def _remove_picture(self):
+        """
+        REQUIRES: cutePictureFilename is not empty
+        MODIFIES: current directory
+        EFFECTS:  Removes the imgur picture from the current directory.
+        """
+        if self.cute_picture_filename != '':
+            os.remove(self.cute_picture_filename)
+
+    def _attach_footer_text(self):
+        """
+        MODIFIES: msg
+        EFFECTS:  Attaches the footer text in HTML.
+        """
+        adjectives = ["good", "great", "spectacular", "magnificent", "splendid", "dazzling",
+                      "sensational", "remarkable", "outstanding", "memorable", "unforgettable"]
+        footer = "Have a " + random.choice(adjectives) + " day!"
+        footer_html = "<h3 style=\"font-weight: normal; font-style: oblique;\">" + footer + "</h3>"
+        self._attach_message_text(footer_html)
+
+    # ======
+    # PUBLIC
+    # ======
+
+    def send_emails(self):
+        """
+        EFFECTS:  Downloads the picture, and sends an email to the given person.
+        """
+        self._retrieve_daily_picture()
+        self.attach_image(self.cute_picture_filename)
+        self._attach_message_text(self.caption)
+        self._attach_footer_text()
+        self.create_session_and_send()
+        self._remove_picture()
+
+        print "Sent emails!"
+
+    def init_daily_emails(self):
+        """
+        MODIFIES: SMTP
+        EFFECTS:  Initializes the daily email sending.
+        """
+        self.send_emails()
+        RepeatedTimer(DAY, self.send_emails)
+
+    def init_email_sender(self, email_sending_hour):
+        """
+        EFFECTS: Begins the daily email sending procedure, at the starting hour.
+        """
+        now = datetime.datetime.now()
+        next_time_day = datetime.datetime.now().day
+
+        # Ensures that emails are sent at proper time
+        if now.hour >= email_sending_hour:
+            next_time_day += 1
+
+        next_time = datetime.datetime(now.year, now.month, next_time_day, EMAIL_SENDING_HOUR, 0, 0)
+        time_interval = (next_time - now).total_seconds()
+        threading.Timer(time_interval, self.init_daily_emails).start()
