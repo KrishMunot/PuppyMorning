@@ -14,6 +14,10 @@ from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+from threading import Timer
+import datetime
+import threading
+
 # Example SMTP server - gmail.com
 SMTP_SERVER = 'smtp.gmail.com'
 SMTP_PORT = 587
@@ -195,3 +199,34 @@ class MorningPuppiesSender(EmailSender):
         next_time = datetime.datetime(now.year, now.month, next_time_day, EMAIL_SENDING_HOUR, 0, 0)
         time_interval = (next_time - now).total_seconds()
         threading.Timer(time_interval, self.init_daily_emails).start()
+
+class RepeatedTimer(object):
+    """RepeatedTimer repeats a function call at a given interval of time,
+    until stopped.
+    """
+    def __init__(self, interval, function, *args, **kwargs):
+        self._timer = None
+        self.interval = interval
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+        self.is_running = False
+        self.start()
+
+    def _run(self):
+        """Runs the function."""
+        self.is_running = False
+        self.start()
+        self.function(*self.args, **self.kwargs)
+
+    def start(self):
+        """Starts the function calls."""
+        if not self.is_running:
+            self._timer = Timer(self.interval, self._run)
+            self._timer.start()
+            self.is_running = True
+
+    def stop(self):
+        """Stops the function calls."""
+        self._timer.cancel()
+        self.is_running = False
