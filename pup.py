@@ -2,7 +2,7 @@
 
 """
 Krish Munot
-May 9, 2016
+May 8, 2016
 The things I do instead of studying for finals :D
 """
 
@@ -38,6 +38,9 @@ class EmailSender
 """
 
 class EmailSender(object):
+    """    An SMTP email sending client that can send an email with
+        attachments to multiple people.
+    """
 
     def __init__(self, subject):
         # Authentication information
@@ -66,14 +69,29 @@ class EmailSender(object):
         part.set_payload(html_message)
         self.msg.attach(part)
         
+    # ======
+    # PUBLIC
+    # ======
+
     def attach_image(self, image_filename):
+        """
+        REQUIRES: image_filename is a file that exists in the current directory
+        MODIFIES: self.msg
+        EFFECTS:  Attaches the image with the given filename to self.msg.
+        """
         path = os.path.join(DIRECTORY, image_filename)
+
         img = MIMEImage(open(path, 'rb').read(), _subtype="gif")
         img.add_header('Content-Disposition', 'attachment', filename=image_filename)
         self.msg.attach(img)
-        
+
     def create_session_and_send(self):
+        """
+        REQUIRES: Valid connection to the Gmail SMTP server
+        EFFECTS:  Sends the message to the given recipient.
+        """
         session = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+
         session.ehlo()
         session.starttls()
         session.login(self._sender, self._password)
