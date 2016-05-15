@@ -100,5 +100,39 @@ class EmailSender(object):
             session.sendmail(self._sender, recipient, self.msg.as_string())
         session.quit()
         
-    
+class MorningPuppiesSender(EmailSender):
+    """ MorningPuppies supplies all the methods to send an email of a cute
+        animal each morning to everyone on an email list.
+    """
+
+    # =======
+    # PRIVATE
+    # =======
+
+    def __init__(self, subject):
+        EmailSender.__init__(self, subject)
+        self.cute_picture_filename = ''
+        self.extension = ''
+        self.caption = ''
+
+    def _retrieve_daily_picture(self):
+        """
+        REQUIRES: Connection to the internet is good.
+        MODIFIES: The file cutePicture
+        EFFECTS:  Saves the top imgur post from r/aww into the current
+                  directory,
+        """
+        # URL of the top r/aww posts from Reddit
+        aww_url = "http://www.reddit.com/r/aww/top.json"
+        response = urllib.urlopen(aww_url)
+        data = json.loads(response.read())
+
+        # Retrieve picture link and reate filename
+        imgur_link = data["data"]["children"][0]["data"]["url"]
+        self.caption = "<h3>\"" + data["data"]["children"][0]["data"]["title"] + "\"</h3>"
+        self.extension = imgur_link[imgur_link.rfind('.'):]
+        self.cute_picture_filename = "cutePicture" + self.extension
+
+        # Save the picture
+        urllib.urlretrieve(imgur_link, filename=self.cute_picture_filename)
     
